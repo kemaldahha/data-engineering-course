@@ -1,0 +1,31 @@
+Why am I doing this course?
+This course teaches in-demand skills. 
+I want to learn these skills such that I can become a freelance/remote. developer
+These skills will also benefit me if I want to start my own company.
+By doing it through a course, I am forcing myself to learn new things.
+I need to mix it with projects though.
+
+What is my goal?
+My goal is to create a portfolio of projects and videos.
+My goal is to become an all-round generalist who can set up an end-to-end project.
+
+Module 1 - Docker Terraform
+    terraform_gcp
+    docker_sql
+
+Module 2 - Workflow Orchestration
+
+
+Module 3 - Data Warehouse
+
+
+Module 4 - Analytics Engineering
+
+
+Module 5 - Batch
+
+
+Module 6 - Streaming
+
+
+
