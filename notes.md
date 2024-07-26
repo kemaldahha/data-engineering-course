@@ -545,7 +545,11 @@ Not sure why, but the data is gone. Perhaps I removed the container (though I do
 In any case, to ingest the data again:
 
 ```ps
-set URL="http://172.26.160.1:8000/temp.parquet"
+set URL_taxi="http://192.168.137.1:8000/output.csv"
+```
+
+```ps
+set URL_lookup="http://192.168.137.1:8000/taxi_zone_lookup.csv"
 ```
 
 ```ps
@@ -554,11 +558,13 @@ docker run -it ^
     taxi_ingest:v001 ^
         --user=root ^
         --password=root ^
-        --host=pg-database ^
+        --host=pgdatabase ^
         --port=5432 ^
         --db=ny_taxi ^
-        --table-name=yellow_taxi_trips ^
-        --url=%URL%
+        --yellow_taxi_table_name=yellow_taxi_trips ^
+        --yellow_taxi_url=%URL_taxi% ^
+        --zones_table_name=zones ^
+        --zones_url=%URL_lookup%
 ```
 
 After ingesting the data and subsequently `docker compose down` and `docker compose up`, I inspected the data and verified that the data persisted.
@@ -566,4 +572,276 @@ After ingesting the data and subsequently `docker compose down` and `docker comp
 ## DE Zoomcamp 1.2.6 - SQL Refresher
 
 [DE Zoomcamp 1.2.6 - SQL Refresher](https://youtu.be/QEcps_iskgg?si=6NYcKjcoTl9uoOtt)
+
+It was not explained in the last video, but you also have to upload the taxi zones csv file. I found a script on the Github repository of the course. But it uses `wget`. I asked ChatGPT to change it to `requests` library. I got it to work and uploaded the data to the database.
+
+Below you can see an Inner join (always a match between tables).
+What happens is:
+- We `SELECT` some columns
+- `FROM` 3 tables (actually the latter two are the same, but these are appended. I believe this happens as a Cartesian product). The 3 tables get aliases.
+- We filter with the `WHERE` condition (this is effectively an Inner join, i.e. there is always a match)
+- We `LIMIT` the results to the first 100 rows only.
+
+```postgresql
+SELECT
+	t.tpep_pickup_datetime,
+	t.tpep_dropoff_datetime,
+	t.total_amount,
+	CONCAT(zpu.borough, ' / ', zpu.zone) AS "pick_up_loc",
+	CONCAT(zdo.borough, ' / ', zdo.zone) AS "do_up_loc"
+FROM 
+	yellow_taxi_trips t,
+	zones zpu,
+	zones zdo
+WHERE
+	t.pulocationid = zpu.locationid AND
+	t.dolocationid = zdo.locationid
+LIMIT
+    100;
+```
+
+### JOIN
+
+An alternative formulation of this with `JOIN` instead of `WHERE`:
+
+```postgresql
+SELECT
+	t.tpep_pickup_datetime,
+	t.tpep_dropoff_datetime,
+	t.total_amount,
+	CONCAT(zpu.borough, ' / ', zpu.zone) AS "pick_up_loc",
+	CONCAT(zdo.borough, ' / ', zdo.zone) AS "do_up_loc"
+FROM 
+	yellow_taxi_trips t 
+JOIN zones zpu 
+  ON t.pulocationid = zpu.locationid
+JOIN zones zdo
+  ON t.dolocationid = zdo.locationid
+LIMIT 100;
+```
+
+Let's check for records which are missing a Location ID:
+
+```sqlSELECT
+	t.tpep_pickup_datetime,
+	t.tpep_dropoff_datetime,
+	t.total_amount,
+	pulocationid,
+	dolocationid
+FROM 
+	yellow_taxi_trips t
+WHERE
+	pulocationid IS NULL
+LIMIT 100;
+```
+
+```sqlSELECT
+	t.tpep_pickup_datetime,
+	t.tpep_dropoff_datetime,
+	t.total_amount,
+	pulocationid,
+	dolocationid
+FROM 
+	yellow_taxi_trips t
+WHERE
+	dolocationid IS NULL
+LIMIT 100;
+```
+
+There is one record which is missing pickup and dropoff location information.
+
+Are there any records in the `yellow_taxi_trips` table that are not in the `zones` table?
+
+```postgresql
+SELECT
+	*
+FROM
+	yellow_taxi_trips t
+WHERE
+	pulocationid NOT IN (SELECT locationid FROM zones)
+LIMIT 100;
+```
+
+```postgresql
+SELECT
+	*
+FROM 
+	yellow_taxi_trips t
+WHERE
+	dolocationid NOT IN (SELECT locationid FROM zones)
+LIMIT 100;
+```
+
+There are no such records. Let's create such a case.
+
+First find `pulocationid` of the first row from `yellow_taxi_trips`.
+
+```sql
+SELECT *
+FROM yellow_taxi_trips
+LIMIT 100;
+```
+
+It is 97. Now let's delete it.
+
+```sql
+DELETE FROM zones WHERE locationid = 97;
+```
+
+Now we find many such missing records.
+
+Next, let's do a left join:
+
+```postgresql
+SELECT
+	t.tpep_pickup_datetime,
+	t.tpep_dropoff_datetime,
+	t.total_amount,
+	CONCAT(zpu.borough, ' / ', zpu.zone) AS "pick_up_loc",
+	CONCAT(zdo.borough, ' / ', zdo.zone) AS "do_up_loc"
+FROM 
+	yellow_taxi_trips t 
+LEFT JOIN zones zpu 
+  ON t.pulocationid = zpu.locationid
+LEFT JOIN zones zdo
+  ON t.dolocationid = zdo.locationid
+WHERE t.dolocationid = 97 OR t.pulocationid = 97 
+LIMIT 100;
+```
+
+This shows all records on the left, that may or may not have records on the right.
+
+There is also `RIGHT JOIN`, which is the opposite.
+
+There is also `OUTER JOIN`, which is either one.
+
+### GROUPBY
+
+Let's look at number of trips per day.
+
+Below two options are shown to get the day:
+
+```postgresql
+SELECT
+	CAST(tpep_dropoff_datetime AS DATE),
+	t.total_amount
+FROM 
+	yellow_taxi_trips t
+LIMIT 100;
+```
+
+We will go for the second one using `CAST`.
+
+Now we can use `GROUP BY`:
+
+```postgresql
+SELECT
+	CAST(tpep_dropoff_datetime AS DATE) as "day",
+	COUNT(1)
+FROM
+	yellow_taxi_trips t
+GROUP BY
+	"day"
+ORDER BY "day" ASC;
+```
+
+What is the day with the highest number of trips?
+
+```postgresql
+SELECT
+	CAST(tpep_dropoff_datetime AS DATE) as "day",
+	COUNT(1),
+    MAX(total_amount)
+FROM
+	yellow_taxi_trips t
+GROUP BY
+	"day"
+ORDER BY "count" DESC
+LIMIT 1;
+```
+
+What is the highest amount paid on the day with the highest  number of trips?
+
+```postgresql
+SELECT
+	CAST(tpep_dropoff_datetime AS DATE) as "day",
+	COUNT(1),
+    MAX(total_amount)
+FROM
+	yellow_taxi_trips t
+GROUP BY
+	"day"
+ORDER BY "count" DESC
+LIMIT 1;
+```
+
+We can also group by multiple columns.
+
+```postgresql
+SELECT
+	CAST(tpep_dropoff_datetime AS DATE) as "day",
+	dolocationid,
+	COUNT(1),
+    MAX(total_amount)
+FROM
+	yellow_taxi_trips t
+GROUP BY
+	1, 2
+ORDER BY "day" ASC, "dolocationid" ASC;
+```
+
+## DE Zoomcamp 1.3.1 - Terraform Primer
+
+[DE Zoomcamp 1.3.1 - Terraform Primer](https://youtu.be/s2bOYDCKl_M?si=xOYCfHjJrBU-BYWo)
+
+### What is Terraform?
+Software by Hashicorp that:
+- Sets up infrastructure on cloud or on-premise resources
+- Infrastructure is set up with code
+- It uses human-readable configuration files that can be versioned, reused, shared
+
+### Why use Terraform?
+- Simplicity in keeping track of infrastructure
+- Collaboration
+- Reproducibility
+- Ensure resources are removed (important to avoid unnecessary charges)
+
+### How does Terraform work?
+- You have your local machine with Terraform installed
+- You get a provider which allows you to communicate with a resource such as a cloud platform (e.g. GCP, AWS, Azure)
+- A provider can be pulled from Terraform (like a Docker image from Docker Hub?). There are many, such as AWS, Azure, GCP, Kubernetes, VSphere, Alibaba Cloud, Oracle Cloud Infrastructure
+
+### Key Terraform Commands
+- `init`: once you define your provider, `init` downloads the corresponding code to your local machine
+- `plan`: once you defined some resources, `plan` shows you what its about to do, i.e. show resources that are about to be created
+- `apply`: does what is in the .tf files, build that infrastructure
+- `destroy`: brings down all the resources that are in your .tf files.
+
+
+## DE Zoomcamp 1.3.2 - Terraform Basics
+
+[DE Zoomcamp 1.3.2 - Terraform Basics]()
+
+
+## DE Zoomcamp 1.3.3 - Terraform Variables
+
+[DE Zoomcamp 1.3.3 - Terraform Variables]()
+
+
+## DE Zoomcamp 1.4.1 - Setting up the Environment on Google Cloud (Cloud VM + SSH access)
+
+[DE Zoomcamp 1.4.1 - Setting up the Environment on Google Cloud (Cloud VM + SSH access)]()
+
+
+
+## DE Zoomcamp 1.4.2 - Using Github Codespaces for the Course (by Luis Oliveira)
+
+[DE Zoomcamp 1.4.2 - Using Github Codespaces for the Course (by Luis Oliveira)]()
+
+
+
+## DE Zoomcamp 1.5.1 - Port Mapping and Networks in Docker (Bonus)
+
+[DE Zoomcamp 1.5.1 - Port Mapping and Networks in Docker (Bonus)]()
+
 
