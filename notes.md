@@ -820,25 +820,73 @@ Software by Hashicorp that:
 
 ## DE Zoomcamp 1.3.2 - Terraform Basics
 
-[DE Zoomcamp 1.3.2 - Terraform Basics]()
+[DE Zoomcamp 1.3.2 - Terraform Basics](https://youtu.be/Y2ux7gq3Z0o?si=tXSVjlOAr-iRntRs)
 
+First need to set up a Google Cloud Platform (GCP) account.
+
+Then set up Service Account (explained in video).
+
+Then download Terraform binary and add to Path variable (asked ChatGPT).
+
+Search for `Terraform Google Provider` and `Terraform Google Storage Bucket` and take code snippets:
+
+```
+terraform {
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = "5.38.0"
+    }
+  }
+}
+
+provider "google" {
+  credentials = "./keys/my-creds.json"
+  project     = "dtc-de-course-430705"
+  region      = "us-central1"
+}
+
+resource "google_storage_bucket" "demo-bucket" {
+  name          = "dtc-de-course-430705-terra-bucket"
+  location      = "US"
+  force_destroy = true
+
+  lifecycle_rule {
+    condition {
+      age = 1
+    }
+    action {
+      type = "AbortIncompleteMultipartUpload"
+    }
+  }
+}
+```
+
+Now to `terraform init` and it will initialize.
+
+Then do `terraform plan` to see what Terraform plans to create in terms of resources.
+
+Then do `terraform apply`. Confirm bucket was created on GCP.
+
+Finally use `terraform destroy`. Confirm bucket was deleted on GCP.
+
+[Terraform .gitignore file](https://github.com/github/gitignore/blob/main/Terraform.gitignore) 
 
 ## DE Zoomcamp 1.3.3 - Terraform Variables
 
-[DE Zoomcamp 1.3.3 - Terraform Variables]()
+[DE Zoomcamp 1.3.3 - Terraform Variables](https://youtu.be/PBi0hHjLftk?si=yekeJcir_sMAnAaB)
 
 
 ## DE Zoomcamp 1.4.1 - Setting up the Environment on Google Cloud (Cloud VM + SSH access)
 
 [DE Zoomcamp 1.4.1 - Setting up the Environment on Google Cloud (Cloud VM + SSH access)]()
 
-
+> [!NOTE]
+Note: from here on out I will work with Windows Subsystem for Linux. I might need to redo some of the steps from before in setting up Docker, but I think it's worth it.
 
 ## DE Zoomcamp 1.4.2 - Using Github Codespaces for the Course (by Luis Oliveira)
 
 [DE Zoomcamp 1.4.2 - Using Github Codespaces for the Course (by Luis Oliveira)]()
-
-
 
 ## DE Zoomcamp 1.5.1 - Port Mapping and Networks in Docker (Bonus)
 
