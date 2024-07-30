@@ -876,13 +876,113 @@ Finally use `terraform destroy`. Confirm bucket was deleted on GCP.
 
 [DE Zoomcamp 1.3.3 - Terraform Variables](https://youtu.be/PBi0hHjLftk?si=yekeJcir_sMAnAaB)
 
+We will create a Bigquery dataset via Terraform. Google `Terraform Bigquery Dataset` and take small code snippet:
+
+```
+resource "google_bigquery_dataset" "demo_dataset" {
+  dataset_id = "demo_dataset"
+}
+```
+
+Add to `main.tf`. Now if we do `terraform plan`, we can see information on Bigquery. Now we can `terraform apply`.
+
+> [!NOTE]
+I needed to enable Bigquery manually. Not sure why it wasn't already enabled.
+
+After `terraform apply` confirmed that indeed `demo_dataset` is created.
+
+Now do `terraform destroy`.
+
+You do not need to put everything in your `main.tf` file. Instead you can have a separate file with your variables defined there. Here is an example:
+
+`main.tf`
+
+```
+terraform {
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = "5.38.0"
+    }
+  }
+}
+
+provider "google" {
+  credentials = file(var.credentials)
+  project     = var.project
+  region      = var.region
+}
+
+resource "google_storage_bucket" "demo-bucket" {
+  name          = var.gcs_bucket_name
+  location      = var.location
+  force_destroy = true
+
+  lifecycle_rule {
+    condition {
+      age = 1
+    }
+    action {
+      type = "AbortIncompleteMultipartUpload"
+    }
+  }
+}
+
+resource "google_bigquery_dataset" "demo_dataset" {
+  dataset_id = var.bq_dataset_name
+  location = var.location
+}
+```
+
+
+`variables.tf`
+
+```
+variable "credentials" {
+    description = "My Credentials"
+    default = "./keys/my-creds.json"
+}
+
+variable "project" {
+    description = "Project Description"
+    default = "dtc-de-course-430705"
+}
+
+variable "region" {
+    description = "Region"
+    default = "us-central1"
+}
+
+variable "location" {
+    description = "Project Location"
+    default = "US"
+}
+
+variable "bq_dataset_name" {
+    description = "My BigQuery Dataset Name"
+    default = "demo_dataset"
+}
+
+variable "gcs_bucket_name" {
+    description = "My Storage Bucket Name"
+    default = "dtc-de-course-430705-terra-bucket"
+}
+
+variable "gcs_storage_class" {
+  description = "Bucket Storage Class"
+  default = "STANDARD"
+}
+```
+
+The variables in `variables.tf` can be accessed in `main.tf`.
+
 
 ## DE Zoomcamp 1.4.1 - Setting up the Environment on Google Cloud (Cloud VM + SSH access)
 
-[DE Zoomcamp 1.4.1 - Setting up the Environment on Google Cloud (Cloud VM + SSH access)]()
+[DE Zoomcamp 1.4.1 - Setting up the Environment on Google Cloud (Cloud VM + SSH access)](https://youtu.be/ae-CV2KfoN0?si=vZfDz6CfuEa3aQ7i)
 
-> [!NOTE]
-Note: from here on out I will work with Windows Subsystem for Linux. I might need to redo some of the steps from before in setting up Docker, but I think it's worth it.
+> [!Note] 
+From here on out I will work with Windows Subsystem for Linux. I might need to redo some of the steps from before in setting up Docker, but I think it's worth it.
 
 ## DE Zoomcamp 1.4.2 - Using Github Codespaces for the Course (by Luis Oliveira)
 
