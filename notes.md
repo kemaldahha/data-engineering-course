@@ -982,7 +982,7 @@ The variables in `variables.tf` can be accessed in `main.tf`.
 [DE Zoomcamp 1.4.1 - Setting up the Environment on Google Cloud (Cloud VM + SSH access)](https://youtu.be/ae-CV2KfoN0?si=vZfDz6CfuEa3aQ7i)
 
 > [!Note] 
-From here on out I will work with Windows Subsystem for Linux. I might need to redo some of the steps from before in setting up Docker, but I think it's worth it.
+From here on out I will work with Windows Subsystem for Linux. I might need to redo some of the steps from before in setting up Docker, but it's probably worth it. 
 
 ## DE Zoomcamp 1.4.2 - Using Github Codespaces for the Course (by Luis Oliveira)
 
