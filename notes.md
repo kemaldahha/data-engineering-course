@@ -10,7 +10,6 @@ Say you have multiple data pipelines chained. Each of them takes some data
 
 Docker is a platform that uses containers to create, deploy, and run applications.
 
-
 ### What are the benefits of Docker?
 
 - Self-contained: Docker containers contain all dependencies needed to run the application (e.g. data processing pipeline). Avoids conflict between different Docker containers.
