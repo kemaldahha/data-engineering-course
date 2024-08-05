@@ -983,6 +983,65 @@ The variables in `variables.tf` can be accessed in `main.tf`.
 > [!Note] 
 From here on out I will work with Windows Subsystem for Linux. I might need to redo some of the steps from before in setting up Docker, but it's probably worth it. 
 
+The goal for this section is to familiarize myself with Google Cloud Platform. This is a key skill if I want to build things and if I'm looking for a Data Engineering role.
+
+### Generate SSH Key
+
+I already have an SSH key, but here's how to do it (described in [GCP docs: create-ssh-keys](https://cloud.google.com/compute/docs/connect/create-ssh-keys)):
+
+```bash
+ssh-keygen -t rsa ~/.ssh/gcp -C kdahha -b 2048
+```
+
+This will generate two keys in your `.ssh` folder: a public key `gcp.pub` and a private key `gcp`.
+
+### Add SSH key to GCP Compute Engine
+
+Now go to GCP Compute Engine > Settings > Metadata > SSH Keys > Add SSH Key.
+
+In the command line use the command `cat ~/.ssh/gcp.pub` to print your public key. Copy that into GCP and save.
+
+Note that all VMs will use this key.
+
+### Create and Set Up VM Instance
+
+We can create a VM instance (specify name, region, OS as Ubuntu, certain specs). Then there will be an external IP shown. We can now SSH into this VM with:
+
+```ps
+ssh -i ~/.ssh/gcp [user name belonging to SSH key]@[IP]
+```
+
+We will download Anaconda 
+
+```bash
+wget https://repo.anaconda.com/archive/Anaconda3-2024.06-1-Linux-x86_64.sh
+bash Anaconda3-2024.06-1-Linux-x86_64.sh
+```
+
+### .ssh config file
+
+Go to `.ssh` folder and create file named config: ```touch config```.
+
+Open with text editor and add following:
+```
+Host de-zoomcamp
+    HostName [external ip]
+    User [ssh user name]
+    IdentityFile ~/.ssh/[gcp]
+```
+
+Now instead of using this command:
+
+```ps
+ssh -i ~/.ssh/gcp [user name belonging to SSH key]@[IP]
+```
+
+We can use:
+
+```ps
+ssh de-zoomcamp
+```
+
 ## DE Zoomcamp 1.4.2 - Using Github Codespaces for the Course (by Luis Oliveira)
 
 [DE Zoomcamp 1.4.2 - Using Github Codespaces for the Course (by Luis Oliveira)]()
