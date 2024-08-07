@@ -980,7 +980,7 @@ The variables in `variables.tf` can be accessed in `main.tf`.
 
 [DE Zoomcamp 1.4.1 - Setting up the Environment on Google Cloud (Cloud VM + SSH access)](https://youtu.be/ae-CV2KfoN0?si=vZfDz6CfuEa3aQ7i)
 
-> [!Note] 
+> [!Note]
 From here on out I will work with Windows Subsystem for Linux. I might need to redo some of the steps from before in setting up Docker, but it's probably worth it. 
 
 The goal for this section is to familiarize myself with Google Cloud Platform. This is a key skill if I want to build things and if I'm looking for a Data Engineering role.
@@ -1003,21 +1003,6 @@ In the command line use the command `cat ~/.ssh/gcp.pub` to print your public ke
 
 Note that all VMs will use this key.
 
-### Create and Set Up VM Instance
-
-We can create a VM instance (specify name, region, OS as Ubuntu, certain specs). Then there will be an external IP shown. We can now SSH into this VM with:
-
-```ps
-ssh -i ~/.ssh/gcp [user name belonging to SSH key]@[IP]
-```
-
-We will download Anaconda 
-
-```bash
-wget https://repo.anaconda.com/archive/Anaconda3-2024.06-1-Linux-x86_64.sh
-bash Anaconda3-2024.06-1-Linux-x86_64.sh
-```
-
 ### .ssh config file
 
 Go to `.ssh` folder and create file named config: ```touch config```.
@@ -1032,15 +1017,76 @@ Host de-zoomcamp
 
 Now instead of using this command:
 
-```ps
+```
 ssh -i ~/.ssh/gcp [user name belonging to SSH key]@[IP]
 ```
 
 We can use:
 
-```ps
+```bash
 ssh de-zoomcamp
 ```
+
+Note that if the VM instance is stopped and resumed, the external IP will change and this will no longer work.
+
+### Create and Set Up VM Instance
+
+> [!Note]
+This is only needed if you cannot set up a local environment. Although not necessary for me, I went through this section to learn about this anyway and to reinforce the things I learned so far while I was setting up locally.
+
+We can create a VM instance (specify name, region, OS as Ubuntu, certain specs). Then there will be an external IP shown. We can now SSH into this VM with:
+
+```ps
+ssh -i ~/.ssh/gcp [user name belonging to SSH key]@[IP]
+```
+
+We will download Anaconda:
+
+```bash
+wget https://repo.anaconda.com/archive/Anaconda3-2024.06-1-Linux-x86_64.sh
+bash Anaconda3-2024.06-1-Linux-x86_64.sh
+```
+
+This installs Anaconda. If it is not added to the path then run:
+
+```bash
+~/anaconda3/bin/conda init
+```
+
+You can check in .bashrc at the end that there is something added for Anaconda:
+
+```bash
+less .bashrc
+```
+
+Moreover you can now run `conda --version` and `which python` and you should see `(base)` prepended to your prompt. You may need to log out and log in, but you can also do `source .bashrc`.
+
+Now install Docker:
+
+```bash
+sudo apt-get update
+sudo apt-get install docker.io
+```
+
+The first one updates the list of packages for apt-get, the second actually installs Docker.
+
+Check that install is succesful by `docker --version`.
+
+### How to connect to VM via SSH using VS Code
+
+In VS Code you can press `CTRL`+`SHIFT`+`P` which will open the command palette.
+Then you can type `Remote-SSH: Connect to Host`. There the host from the SSH config file should be visible. If you click it, it will open a new VS Code window with an SSH connection to the VM.
+
+Note that in my case, I set up my GCP SSH key and config file in WSL. If you open VS Code with WSL and try to connect to the VM, it will give an error. Windows cannot interpret the IdentityFile path from the config file which is `~/.ssh/gcp`. As a workaround, copy `gcp` and `gcp.pub` to the .ssh folder on Windows. Also add the host to the config as follows:
+
+```bash
+Host de-zoomcamp
+    HostName 34.90.68.192
+    User kdahha
+    IdentityFile C:/Users/kfdah/.ssh/gcp
+```
+
+
 
 ## DE Zoomcamp 1.4.2 - Using Github Codespaces for the Course (by Luis Oliveira)
 
