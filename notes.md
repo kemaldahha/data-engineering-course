@@ -1029,7 +1029,7 @@ ssh de-zoomcamp
 
 Note that if the VM instance is stopped and resumed, the external IP will change and this will no longer work.
 
-### Create and Set Up VM Instance
+### Create VM Instance
 
 > [!Note]
 This is only needed if you cannot set up a local environment. Although not necessary for me, I went through this section to learn about this anyway and to reinforce the things I learned so far while I was setting up locally.
@@ -1039,6 +1039,24 @@ We can create a VM instance (specify name, region, OS as Ubuntu, certain specs).
 ```ps
 ssh -i ~/.ssh/gcp [user name belonging to SSH key]@[IP]
 ```
+
+### How to connect to VM via SSH using VS Code
+
+In VS Code you can press `CTRL`+`SHIFT`+`P` which will open the command palette.
+Then you can type `Remote-SSH: Connect to Host`. There the host from the SSH config file should be visible. If you click it, it will open a new VS Code window with an SSH connection to the VM.
+
+Note that in my case, I set up my GCP SSH key and config file in WSL. If you open VS Code with WSL and try to connect to the VM, it will give an error. Windows cannot interpret the IdentityFile path from the config file which is `~/.ssh/gcp`. As a workaround, copy `gcp` and `gcp.pub` to the .ssh folder on Windows. Also add the host to the config as follows:
+
+```bash
+Host de-zoomcamp
+    HostName 34.90.68.192
+    User kdahha
+    IdentityFile C:/Users/kfdah/.ssh/gcp
+```
+
+### Configure VM instance, download relevant software
+
+#### Anaconda
 
 We will download Anaconda:
 
@@ -1061,6 +1079,8 @@ less .bashrc
 
 Moreover you can now run `conda --version` and `which python` and you should see `(base)` prepended to your prompt. You may need to log out and log in, but you can also do `source .bashrc`.
 
+#### Docker
+
 Now install Docker:
 
 ```bash
@@ -1072,20 +1092,97 @@ The first one updates the list of packages for apt-get, the second actually inst
 
 Check that install is succesful by `docker --version`.
 
-### How to connect to VM via SSH using VS Code
-
-In VS Code you can press `CTRL`+`SHIFT`+`P` which will open the command palette.
-Then you can type `Remote-SSH: Connect to Host`. There the host from the SSH config file should be visible. If you click it, it will open a new VS Code window with an SSH connection to the VM.
-
-Note that in my case, I set up my GCP SSH key and config file in WSL. If you open VS Code with WSL and try to connect to the VM, it will give an error. Windows cannot interpret the IdentityFile path from the config file which is `~/.ssh/gcp`. As a workaround, copy `gcp` and `gcp.pub` to the .ssh folder on Windows. Also add the host to the config as follows:
+Run hello world:
 
 ```bash
-Host de-zoomcamp
-    HostName 34.90.68.192
-    User kdahha
-    IdentityFile C:/Users/kfdah/.ssh/gcp
+docker run hello-world
 ```
 
+This gives the output:
+
+```bash
+docker: permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Post "http://%2Fvar%2Frun%2Fdocker.sock/v1.24/containers/create": dial unix /var/run/docker.sock: connect: permission denied.
+See 'docker run --help'.
+```
+
+From https://github.com/sindresorhus/guides/blob/main/docker-without-sudo.md:
+
+```bash
+sudo groupadd docker
+sudo gpasswd -a $USER docker
+sudo service docker restart
+```
+
+Then log out (`CTRL`+`D`) and log back in (`ssh de-zoomcamp`).
+
+Now try hello world again:
+
+```bash
+docker run hello-world
+```
+
+Now pull and run Ubuntu image in interactive mode in bash:
+
+```bash
+docker run -it ubuntu bash
+```
+
+#### Docker-Compose
+
+Create bin directory with mkdir.
+
+Download docker-compose from its GH repo:
+
+```bash
+wget https://github.com/docker/compose/releases/download/v2.29.1/docker-compose-linux-x86_64 -O bin/docker-compose
+```
+
+Use `ls` to check color of file. At first it's white. This means it is not an executable. Need to change it to executable (green):
+
+```bash
+chmode +x docker-compose
+```
+
+We can check version:
+
+```bash
+./docker-compose version
+
+Docker Compose version v2.29.1
+```
+
+Let's add it to the `PATH` variable so we can access it from anywhere:
+
+Use vim to open `~/.bashrc` and add following line to prepend to `PATH`:
+
+```bash
+export PATH="${HOME}/bin:${PATH}"
+```
+
+Now navigate to: `~/data-engineering-zoomcamp/01-docker-terraform/2_docker_sql` 
+
+Run docker-compose:
+
+```bash
+docker-compose up -d
+```
+
+This will run the Dockerfile to pull and run postgres container.
+
+Run following to view active containers:
+
+```bash
+docker ps
+```
+
+#### Clone DE Zoomcamp Repository
+
+Close the repository:
+```bash
+git clone https://github.com/DataTalksClub/data-engineering-zoomcamp.git
+```
+
+#### pgcli
 
 
 ## DE Zoomcamp 1.4.2 - Using Github Codespaces for the Course (by Luis Oliveira)
