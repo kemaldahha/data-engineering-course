@@ -1056,6 +1056,13 @@ Host de-zoomcamp
 
 ### Configure VM instance, download relevant software
 
+#### Clone DE Zoomcamp Repository
+
+Close the repository:
+```bash
+git clone https://github.com/DataTalksClub/data-engineering-zoomcamp.git
+```
+
 #### Anaconda
 
 We will download Anaconda:
@@ -1159,6 +1166,10 @@ Use vim to open `~/.bashrc` and add following line to prepend to `PATH`:
 export PATH="${HOME}/bin:${PATH}"
 ```
 
+You can do `source .bashrc` to reload .bashrc file.
+
+To verify it worked, do `which docker-compose` or `docker-compose version`.
+
 Now navigate to: `~/data-engineering-zoomcamp/01-docker-terraform/2_docker_sql` 
 
 Run docker-compose:
@@ -1167,7 +1178,7 @@ Run docker-compose:
 docker-compose up -d
 ```
 
-This will run the Dockerfile to pull and run postgres container.
+This will run the Dockerfile to pull and run postgres and pgadmin container.
 
 Run following to view active containers:
 
@@ -1175,15 +1186,43 @@ Run following to view active containers:
 docker ps
 ```
 
-#### Clone DE Zoomcamp Repository
-
-Close the repository:
-```bash
-git clone https://github.com/DataTalksClub/data-engineering-zoomcamp.git
-```
-
 #### pgcli
 
+```bash
+pip install pgcli
+```
+
+Now we can run pgcli:
+
+```bash
+ pgcli -h localhost -U root -d ny_taxi
+ ```
+
+This works fine. I also followed the instructions to download via Conda-Forge, but actually that did not work. Had to follow these steps to fix it:
+
+1. pip uninstall psycopg2
+2. pip uninstall pgcli
+3. conda remove pgcli
+4. pip install pgcli
+check with "pgcli -h localhost -U root -d ny_taxi"(without double quotes obvs)
+if it generates error no module named 'pgspecial' or something like this then
+5. pip install --force-reinstall pgcli
+Now recheck with "pgcli -h localhost -U root -d ny_taxi"(without double quotes obvs) should be running now. 
+
+#### Setup port forwarding to local machine
+
+Open VS Code, SSH into GCP VM de-zoomcamp, go to Ports, forward 8080 and 5432.
+
+The you can use:
+
+```bash
+ pgcli -h localhost -U root -d ny_taxi
+ ```
+
+And you can also go to pgadmin via browser:
+```bash
+localhost:8080
+```
 
 ## DE Zoomcamp 1.4.2 - Using Github Codespaces for the Course (by Luis Oliveira)
 
