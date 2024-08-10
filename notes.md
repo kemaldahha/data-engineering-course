@@ -4,8 +4,6 @@
 
 [DE Zoomcamp 1.2.1 - Introduction to Docker](https://youtu.be/EYNwNlOrpr0?si=rw7Z_lDFc1A7Fo36)
 
-Say you have multiple data pipelines chained. Each of them takes some data
-
 ### What is Docker?
 
 Docker is a platform that uses containers to create, deploy, and run applications.
@@ -1054,16 +1052,14 @@ Host de-zoomcamp
     IdentityFile C:/Users/kfdah/.ssh/gcp
 ```
 
-### Configure VM instance, download relevant software
-
-#### Clone DE Zoomcamp Repository
+### Clone DE Zoomcamp Repository
 
 Close the repository:
 ```bash
 git clone https://github.com/DataTalksClub/data-engineering-zoomcamp.git
 ```
 
-#### Anaconda
+### Anaconda
 
 We will download Anaconda:
 
@@ -1086,7 +1082,7 @@ less .bashrc
 
 Moreover you can now run `conda --version` and `which python` and you should see `(base)` prepended to your prompt. You may need to log out and log in, but you can also do `source .bashrc`.
 
-#### Docker
+### Docker
 
 Now install Docker:
 
@@ -1107,7 +1103,7 @@ docker run hello-world
 
 This gives the output:
 
-```bash
+```
 docker: permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Post "http://%2Fvar%2Frun%2Fdocker.sock/v1.24/containers/create": dial unix /var/run/docker.sock: connect: permission denied.
 See 'docker run --help'.
 ```
@@ -1134,7 +1130,7 @@ Now pull and run Ubuntu image in interactive mode in bash:
 docker run -it ubuntu bash
 ```
 
-#### Docker-Compose
+### Docker-Compose
 
 Create bin directory with mkdir.
 
@@ -1186,7 +1182,7 @@ Run following to view active containers:
 docker ps
 ```
 
-#### pgcli
+### pgcli
 
 ```bash
 pip install pgcli
@@ -1209,7 +1205,7 @@ if it generates error no module named 'pgspecial' or something like this then
 5. pip install --force-reinstall pgcli
 Now recheck with "pgcli -h localhost -U root -d ny_taxi"(without double quotes obvs) should be running now. 
 
-#### Setup port forwarding to local machine
+### Setup port forwarding to local machine
 
 Open VS Code, SSH into GCP VM de-zoomcamp, go to Ports, forward 8080 and 5432.
 
@@ -1223,6 +1219,17 @@ And you can also go to pgadmin via browser:
 ```bash
 localhost:8080
 ```
+
+> [!NOTE]
+I could not get port forwarding to work on WSL2.
+Maybe this is not needed though and a connection from Windows is good enough.
+However not sure what the added value is in the first place over simply SSH'ing into the VM from VS Code to run pgcli.
+
+### How to open Jupyter
+
+cd to `2_docker_sql` directory and run `jupyter notebook`. Add the port (8888) to VS Code. Then click the link in the terminal.
+
+### Run 
 
 ## DE Zoomcamp 1.4.2 - Using Github Codespaces for the Course (by Luis Oliveira)
 
