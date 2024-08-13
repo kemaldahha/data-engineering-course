@@ -506,8 +506,6 @@ In the next session we will use docker compose to run these commands in a YAML f
 
 [DE Zoomcamp 1.2.5 - Running Postgres and pgAdmin with Docker-Compose](https://youtu.be/hKI6PkPhpa0?si=68EVr2JXH6wkrTZm)
 
-This lesson 
-
 Our Docker compose file is intended to automatically start the postgres and pgadmin containers. Note that network is not specified, since Docker compose will automatically create a network named `data-engineering-course_default`.
 
 ```docker
@@ -537,7 +535,38 @@ Now we can run docker compose with the following command:
 docker compose up
 ```
 
-Not sure why, but the data is gone. Perhaps I removed the container (though I don't remember doing that).
+Now we have to add a server again. To persist pgAdmin configuration, update docker compose by adding volume mapping to pgadmin service and the volumes section at the very end:
+
+```bash
+services:
+  pgdatabase:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=ny_taxi
+    volumes:
+      - "./ny_taxi_postgres_data:/var/lib/postgresql/data:rw"
+    ports:
+      - "5432:5432"
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=root
+    volumes:
+      - "pgadmin_conn_data:/var/lib/pgadmin:rw"
+    ports:
+      - "8080:80"
+    
+volumes:
+  pgadmin_conn_data:
+```
+
+After ingesting the data and subsequently `docker-compose down` and `docker-compose up -d`, I inspected the data and verified that the server persisted.
+
+> [!NOTE]
+Not sure why, but the Qata is gone. Perhaps I removed the container (though I don't remember doing that).
 
 In any case, to ingest the data again:
 
@@ -564,7 +593,7 @@ docker run -it ^
         --zones_url=%URL_lookup%
 ```
 
-After ingesting the data and subsequently `docker compose down` and `docker compose up`, I inspected the data and verified that the data persisted.
+After ingesting the data and subsequently `docker-compose down` and `docker-compose up`, I inspected the data and verified that the data persisted.
 
 ## DE Zoomcamp 1.2.6 - SQL Refresher
 
@@ -884,7 +913,7 @@ resource "google_bigquery_dataset" "demo_dataset" {
 Add to `main.tf`. Now if we do `terraform plan`, we can see information on Bigquery. Now we can `terraform apply`.
 
 > [!NOTE]
-I needed to enable Bigquery manually. Not sure why it wasn't already enabled.
+I needed to enable BigQuery manually. Not sure why it wasn't already enabled.
 
 After `terraform apply` confirmed that indeed `demo_dataset` is created.
 
@@ -978,7 +1007,7 @@ The variables in `variables.tf` can be accessed in `main.tf`.
 
 [DE Zoomcamp 1.4.1 - Setting up the Environment on Google Cloud (Cloud VM + SSH access)](https://youtu.be/ae-CV2KfoN0?si=vZfDz6CfuEa3aQ7i)
 
-> [!Note]
+> [!NOTE]
 From here on out I will work with Windows Subsystem for Linux. I might need to redo some of the steps from before in setting up Docker, but it's probably worth it. 
 
 The goal for this section is to familiarize myself with Google Cloud Platform. This is a key skill if I want to build things and if I'm looking for a Data Engineering role.
