@@ -1,8 +1,6 @@
 # Week 1
 
-## 1.1.1 Introduction to Docker
-
-[DE Zoomcamp 1.2.1 - Introduction to Docker](https://youtu.be/EYNwNlOrpr0?si=rw7Z_lDFc1A7Fo36)
+## [DE Zoomcamp 1.2.1 - Introduction to Docker](https://youtu.be/EYNwNlOrpr0?si=rw7Z_lDFc1A7Fo36)
 
 ### What is Docker?
 
@@ -102,9 +100,7 @@ docker run -it test:pandas 2024-07-04
 
 Don't forget to build the Docker image first.
 
-## 1.2.1 Ingesting NY Taxi Data to Postgres
-
-[DE Zoomcamp 1.2.2 - Ingesting NY Taxi Data to Postgres](https://youtu.be/2JM-ziJt0WI?si=1Mi05VsHPgodbmVn)
+## [DE Zoomcamp 1.2.2 - Ingesting NY Taxi Data to Postgres](https://youtu.be/2JM-ziJt0WI?si=1Mi05VsHPgodbmVn)
 
 Run Postgres in Docker and put data in Postgres database with a Python script.
 
@@ -253,9 +249,7 @@ which will give us:
 Next, we will use pgAdmin instead of pgcli.
 
 
-## 1.2.3 Connecting pgAdmin and Postgres
-
-[DE Zoomcamp 1.2.3 Connecting pgAdmin and Postgres](https://youtu.be/hCAIVe9N0ow?si=NWVSa25g4QeRjzue)
+## [DE Zoomcamp 1.2.3 Connecting pgAdmin and Postgres](https://youtu.be/hCAIVe9N0ow?si=NWVSa25g4QeRjzue)
 
 Picking up where we left off last time, we can do some additional checks of our data in the database using pgcli:
 
@@ -314,9 +308,7 @@ docker run -it ^
 
 In the next session we will dockerize the ingestion script and run everything from Docker.
 
-## DE Zoomcamp 1.2.4 - Dockerizing the Ingestion Script
-
-[DE Zoomcamp 1.2.4 - Dockerizing the Ingestion Script](https://youtu.be/B1WwATwf-vY?si=-xj66cqaCgP6t1Rf)
+## [DE Zoomcamp 1.2.4 - Dockerizing the Ingestion Script](https://youtu.be/B1WwATwf-vY?si=-xj66cqaCgP6t1Rf)
 
 The code from the last session is made into a python script called `ingest_data.py`.
 
@@ -502,9 +494,7 @@ docker run -it ^
 
 In the next session we will use docker compose to run these commands in a YAML file instead of in two separate command prompt windows.
 
-## DE Zoomcamp 1.2.5 - Running Postgres and pgAdmin with Docker-Compose
-
-[DE Zoomcamp 1.2.5 - Running Postgres and pgAdmin with Docker-Compose](https://youtu.be/hKI6PkPhpa0?si=68EVr2JXH6wkrTZm)
+## [DE Zoomcamp 1.2.5 - Running Postgres and pgAdmin with Docker-Compose](https://youtu.be/hKI6PkPhpa0?si=68EVr2JXH6wkrTZm)
 
 Our Docker compose file is intended to automatically start the postgres and pgadmin containers. Note that network is not specified, since Docker compose will automatically create a network named `data-engineering-course_default`.
 
@@ -595,9 +585,7 @@ docker run -it ^
 
 After ingesting the data and subsequently `docker-compose down` and `docker-compose up`, I inspected the data and verified that the data persisted.
 
-## DE Zoomcamp 1.2.6 - SQL Refresher
-
-[DE Zoomcamp 1.2.6 - SQL Refresher](https://youtu.be/QEcps_iskgg?si=6NYcKjcoTl9uoOtt)
+## [DE Zoomcamp 1.2.6 - SQL Refresher](https://youtu.be/QEcps_iskgg?si=6NYcKjcoTl9uoOtt)
 
 It was not explained in the last video, but you also have to upload the taxi zones csv file. I found a script on the Github repository of the course. But it uses `wget`. I asked ChatGPT to change it to `requests` library. I got it to work and uploaded the data to the database.
 
@@ -818,9 +806,7 @@ GROUP BY
 ORDER BY "day" ASC, "dolocationid" ASC;
 ```
 
-## DE Zoomcamp 1.3.1 - Terraform Primer
-
-[DE Zoomcamp 1.3.1 - Terraform Primer](https://youtu.be/s2bOYDCKl_M?si=xOYCfHjJrBU-BYWo)
+## [DE Zoomcamp 1.3.1 - Terraform Primer](https://youtu.be/s2bOYDCKl_M?si=xOYCfHjJrBU-BYWo)
 
 ### What is Terraform?
 Software by Hashicorp that:
@@ -846,9 +832,7 @@ Software by Hashicorp that:
 - `destroy`: brings down all the resources that are in your .tf files.
 
 
-## DE Zoomcamp 1.3.2 - Terraform Basics
-
-[DE Zoomcamp 1.3.2 - Terraform Basics](https://youtu.be/Y2ux7gq3Z0o?si=tXSVjlOAr-iRntRs)
+## [DE Zoomcamp 1.3.2 - Terraform Basics](https://youtu.be/Y2ux7gq3Z0o?si=tXSVjlOAr-iRntRs)
 
 First need to set up a Google Cloud Platform (GCP) account.
 
@@ -900,9 +884,7 @@ Finally use `terraform destroy`. Confirm bucket was deleted on GCP.
 
 [Terraform .gitignore file](https://github.com/github/gitignore/blob/main/Terraform.gitignore) 
 
-## DE Zoomcamp 1.3.3 - Terraform Variables
-
-[DE Zoomcamp 1.3.3 - Terraform Variables](https://youtu.be/PBi0hHjLftk?si=yekeJcir_sMAnAaB)
+## [DE Zoomcamp 1.3.3 - Terraform Variables](https://youtu.be/PBi0hHjLftk?si=yekeJcir_sMAnAaB)
 
 We will create a Bigquery dataset via Terraform. Google `Terraform Bigquery Dataset` and take small code snippet:
 
@@ -1007,9 +989,7 @@ The variables in `variables.tf` can be accessed in `main.tf`.
 
 
 
-## DE Zoomcamp 1.4.1 - Setting up the Environment on Google Cloud (Cloud VM + SSH access)
-
-[DE Zoomcamp 1.4.1 - Setting up the Environment on Google Cloud (Cloud VM + SSH access)](https://youtu.be/ae-CV2KfoN0?si=vZfDz6CfuEa3aQ7i)
+## [DE Zoomcamp 1.4.1 - Setting up the Environment on Google Cloud (Cloud VM + SSH access)](https://youtu.be/ae-CV2KfoN0?si=vZfDz6CfuEa3aQ7i)
 
 > [!NOTE]
 From here on out I will work with Windows Subsystem for Linux. I might need to redo some of the steps from before in setting up Docker, but it's probably worth it. 
@@ -1302,15 +1282,11 @@ Now do:
 `terraform init`, `terraform plan`, `terraform apply`, and, finally, `terraform destroy`.
 
 
-## DE Zoomcamp 1.4.2 - Using Github Codespaces for the Course (by Luis Oliveira)
-
-[DE Zoomcamp 1.4.2 - Using Github Codespaces for the Course (by Luis Oliveira)](https://youtu.be/XOSUt8Ih3zA?si=hwYxC6643OM7Rqwe)
+## [DE Zoomcamp 1.4.2 - Using Github Codespaces for the Course (by Luis Oliveira)](https://youtu.be/XOSUt8Ih3zA?si=hwYxC6643OM7Rqwe)
 
 Walkthrough of how to set up Github Codespaces. Not of interest to me, I'll work either locally or on a VM.
 
-## DE Zoomcamp 1.5.1 - Port Mapping and Networks in Docker (Bonus)
-
-[DE Zoomcamp 1.5.1 - Port Mapping and Networks in Docker (Bonus)](https://youtu.be/tOr4hTsHOzU?si=ccwn_HBFcqZhO0N4)
+## [DE Zoomcamp 1.5.1 - Port Mapping and Networks in Docker (Bonus)](https://youtu.be/tOr4hTsHOzU?si=ccwn_HBFcqZhO0N4)
 
 Say you are running 2 containers on a VM. You can map a port used by the application in the container (e.g. Postgres uses 5432, pgAdmin uses 8080) to a port on the VM. Typically you would map it to the same port if available, otherwise you can pick another port that is free. This could happen for instance if you are running Postgres on the VM without Docker. It will occupy port 5432. Then if you want to run Postgres via a Docker container, that port will be unavailable for the port mapping. In this case, you could opt for port 5431 for instance.
 
