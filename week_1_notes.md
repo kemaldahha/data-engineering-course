@@ -566,7 +566,7 @@ volumes:
 After ingesting the data and subsequently `docker-compose down` and `docker-compose up -d`, I inspected the data and verified that the server persisted.
 
 > [!NOTE]
-Not sure why, but the Qata is gone. Perhaps I removed the container (though I don't remember doing that).
+Not sure why, but the data is gone. Perhaps I removed the container (though I don't remember doing that).
 
 In any case, to ingest the data again:
 
@@ -648,7 +648,8 @@ LIMIT 100;
 
 Let's check for records which are missing a Location ID:
 
-```sqlSELECT
+```sql
+SELECT
 	t.tpep_pickup_datetime,
 	t.tpep_dropoff_datetime,
 	t.total_amount,
@@ -661,7 +662,8 @@ WHERE
 LIMIT 100;
 ```
 
-```sqlSELECT
+```sql
+SELECT
 	t.tpep_pickup_datetime,
 	t.tpep_dropoff_datetime,
 	t.total_amount,
@@ -1003,6 +1005,8 @@ variable "gcs_storage_class" {
 The variables in `variables.tf` can be accessed in `main.tf`.
 
 
+
+
 ## DE Zoomcamp 1.4.1 - Setting up the Environment on Google Cloud (Cloud VM + SSH access)
 
 [DE Zoomcamp 1.4.1 - Setting up the Environment on Google Cloud (Cloud VM + SSH access)](https://youtu.be/ae-CV2KfoN0?si=vZfDz6CfuEa3aQ7i)
@@ -1258,14 +1262,56 @@ However not sure what the added value is in the first place over simply SSH'ing 
 
 cd to `2_docker_sql` directory and run `jupyter notebook`. Add the port (8888) to VS Code. Then click the link in the terminal.
 
-### Run 
+### Terraform
+
+First we download Terraform (binary) on the GCP VM into bin folder (which is already in our Path variable). Use `unzip` to unzip it and `rm` to remove zipped file. After installing, check that it worked with `terraform version`.
+
+Use `mkdir ~./.gc` to create a folder that will hold GCP credentials. Use `sftp` from local machine to upload `my-creds.json` which we set up during Zoomcamp 1.3.2 to GCP. Create and navigate to `.gc` on GCP and use `put my-creds.json`.
+
+Then input: 
+
+```bash
+export GOOGLE_APPLICATION_CREDENTIALS=~/.gc/my-creds.json
+gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
+```
+
+The command `export GOOGLE_APPLICATION_CREDENTIALS=~/.gc/my-creds.json` sets the environment variable that points to your Google Cloud service account credentials file, while `gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS` uses that file to authenticate your session, allowing Terraform and other tools to interact with Google Cloud resources securely.
+
+Now `cd` into `1_terraform_gcp/terraform_with_variables`. Update in variables.tf: project id (needs to match the one from GCP). Update main.tf as below (this assigns random bucket name and id which is a requirement by GCP).
+
+```
+resource "random_id" "bucket_id" {
+  byte_length = 4
+}
+
+resource "google_storage_bucket" "demo_bucket" {
+  name     = "${var.gcs_bucket_name}-${random_id.bucket_id.hex}"
+  location = "US"
+  lifecycle_rule {
+    condition {
+      age = 1
+    }
+    action {
+      type = "AbortIncompleteMultipartUpload"
+    }
+  }
+}
+```
+
+Now do:
+`terraform init`, `terraform plan`, `terraform apply`, and, finally, `terraform destroy`.
+
 
 ## DE Zoomcamp 1.4.2 - Using Github Codespaces for the Course (by Luis Oliveira)
 
-[DE Zoomcamp 1.4.2 - Using Github Codespaces for the Course (by Luis Oliveira)]()
+[DE Zoomcamp 1.4.2 - Using Github Codespaces for the Course (by Luis Oliveira)](https://youtu.be/XOSUt8Ih3zA?si=hwYxC6643OM7Rqwe)
+
+Walkthrough of how to set up Github Codespaces. Not of interest to me, I'll work either locally or on a VM.
 
 ## DE Zoomcamp 1.5.1 - Port Mapping and Networks in Docker (Bonus)
 
-[DE Zoomcamp 1.5.1 - Port Mapping and Networks in Docker (Bonus)]()
+[DE Zoomcamp 1.5.1 - Port Mapping and Networks in Docker (Bonus)](https://youtu.be/tOr4hTsHOzU?si=ccwn_HBFcqZhO0N4)
 
+Say you are running 2 containers on a VM. You can map a port used by the application in the container (e.g. Postgres uses 5432, pgAdmin uses 8080) to a port on the VM. Typically you would map it to the same port if available, otherwise you can pick another port that is free. This could happen for instance if you are running Postgres on the VM without Docker. It will occupy port 5432. Then if you want to run Postgres via a Docker container, that port will be unavailable for the port mapping. In this case, you could opt for port 5431 for instance.
 
+![schematic](image.png)
