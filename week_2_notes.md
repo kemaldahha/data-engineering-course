@@ -28,8 +28,8 @@ Data Lake solutions need to be secure, scalable, and its HW inexpensive to be ab
     - Use cases: batch processing or BI reporting
 
 ### How did it start? / Why did Data Lakes become popular?
-- Companies realized value of data is valuable
-- Data cannot always be well-defined from the get go. There is value in storing now and figurng out later. Data Lakes allow for this.
+- Companies realized the value of data
+- Data cannot always be well-defined from the get go. Store now and figure out what to do with it later. Data Lakes allow for this.
 - Increase in Data Scientists and R&D on data products
 - This prompted the need for cheap storage of Big Data
 
