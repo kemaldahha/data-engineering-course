@@ -1290,4 +1290,4 @@ Walkthrough of how to set up Github Codespaces. Not of interest to me, I'll work
 
 Say you are running 2 containers on a VM. You can map a port used by the application in the container (e.g. Postgres uses 5432, pgAdmin uses 8080) to a port on the VM. Typically you would map it to the same port if available, otherwise you can pick another port that is free. This could happen for instance if you are running Postgres on the VM without Docker. It will occupy port 5432. Then if you want to run Postgres via a Docker container, that port will be unavailable for the port mapping. In this case, you could opt for port 5431 for instance.
 
-![schematic](image.png)
+![schematic](images/image.png)
