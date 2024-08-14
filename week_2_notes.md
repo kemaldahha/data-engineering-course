@@ -6,6 +6,53 @@ The most recent version of the course covering this week ([2024 cohort](https://
 
 ## [DE Zoomcamp 2.1.1 - Data Lake](https://www.youtube.com/watch?v=W3Zm6rjOq70&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb)
 
+### What is a Data Lake?
+
+A Data Lake is a central repository that holds big data from many sources. 
+The data it holds can either be structured, semi-structured, or unstructured.
+
+Data Lakes are extensively used for ML and analytics. They also make use of metadata for faster access to data.
+
+Data Lake solutions need to be secure, scalable, and its HW inexpensive to be able to store as much data as quickly as possible.
+
+### Data Lake vs Data Warehouse
+- Data lake: 
+    - Unstructured data
+    - Target users are data scientists/analysts
+    - Huge amounts of data (petabytes)
+    - Use cases: stream processing, ML, real-time analytics
+- Data warehouse: 
+    - Structured data
+    - Target users are business analysts
+    - Smaller amounts of data (petabytes)
+    - Use cases: batch processing or BI reporting
+
+### How did it start? / Why did Data Lakes become popular?
+- Companies realized value of data is valuable
+- Data cannot always be well-defined from the get go. There is value in storing now and figurng out later. Data Lakes allow for this.
+- Increase in Data Scientists and R&D on data products
+- This prompted the need for cheap storage of Big Data
+
+### ETL vs ELT
+- ETL = Export-Transform-Load
+    - Mainly used for small amount of data
+    - Provides support for Data Warehouse (Schema on Write)
+        - First define schema, then write data
+- ELT = Export-Load-Transform
+    - Mainly used for large amount of data
+    - Provides support for Data Lake (Schema on Read)
+        - First write (store) data, define relationships when reading data
+
+### Data Lake Pitfalls
+- Data Swamp
+    - Makes it very hard to use the data
+    - Can happen due to lack of versioning, conflicting schemas, lack of metadata
+    - Joins not possible (e.g. no foreign key available)
+
+### Data Lake Cloud Solutions by Various Providers
+- GCP: Cloud Storage
+- AWS: S3
+- Azure Blob
 
 
 ## [DE Zoomcamp 2.2.1 - Introduction to Workflow Orchestration](https://www.youtube.com/watch?v=0yK7LXwYeD0&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb)
