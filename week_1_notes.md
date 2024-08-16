@@ -1156,7 +1156,7 @@ wget https://github.com/docker/compose/releases/download/v2.29.1/docker-compose-
 Use `ls` to check color of file. At first it's white. This means it is not an executable. Need to change it to executable (green):
 
 ```bash
-chmode +x docker-compose
+chmod +x docker-compose
 ```
 
 We can check version:

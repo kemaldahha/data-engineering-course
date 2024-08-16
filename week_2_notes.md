@@ -1,10 +1,9 @@
 # Week 2
 
 > [!IMPORTANT]
-Since I want to learn Apache Airflow, I am following the 2022 cohort version of this week. 
-The most recent version of the course covering this week ([2024 cohort](https://github.com/DataTalksClub/data-engineering-zoomcamp/tree/main/02-workflow-orchestration)) uses Mage. I'll skim the material and might do a second pass at some point, if I find it necessary.
-
-## [DE Zoomcamp 2.1.1 - Data Lake](https://www.youtube.com/watch?v=W3Zm6rjOq70&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb)
+Sine I want to learn Apache Airflow, I am following the 2022 cohort version of this week. 
+The most recent version of the course covering this week ([2024 cohort](https://github.com/DataTalksClub/data-engineering-zoomcamp/tree/main/02-workflow-orchestration)) uses Mage. I'll skim the material and might do a second pass at some point, if I find it necessary
+[DE Zoomcamp 2.1.1 - Data Lake](https://www.youtube.com/watch?v=W3Zm6rjOq70&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb)
 
 ### What is a Data Lake?
 
@@ -57,7 +56,6 @@ Data Lake solutions need to be secure, scalable, and its HW inexpensive to be ab
 
 ## [DE Zoomcamp 2.2.1 - Introduction to Workflow Orchestration](https://www.youtube.com/watch?v=0yK7LXwYeD0&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb)
 
-
 ### What is Workflow Orchestration?
 
 Data pipeline takes data as input, does something, then outputs the data in a different form.
@@ -90,7 +88,7 @@ During week 2 a different pipeline will be made:
 
 Each step depends on the previous step, so need to execute in order and verify success of previous step.
 
-Rather than a pipeline, this is sometimes also called a Workflow or DAG (Directed Acyclic Graph).
+Rather than a pipeline, this is sometimes also called a Workflow or DAG (Directed Acyclic Graph). A DAG specifies dependencies between set of Tasks with explicit execution order. Task is a defined unit of work.
 
 We have this workflow, but how do we orchestrate this to ensure:
 - Workflow dependencies are respected
@@ -107,6 +105,109 @@ We can use Make, but this is more suitable for smaller workflows. For Data Workf
 
 ## [DE Zoomcamp 2.3.1 - Setup Airflow Environment with Docker-Compose](https://www.youtube.com/watch?v=lqDMzReAtrw&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb)
 
+### Introduction
+
+Airflow consists of:
+- **Web server** (handy GUI to inspect, trigger, and debug DAGs and tasks).
+- **Scheduler** (scheduling jobs, triggering/scheduling workflows, monitors tasks and DAGs)
+- **Worker** (executes tasks given by scheduler)
+- **Metadata Database** (backend to airflow env, used by the scheduler/executor/web server to store state of the environment)
+- Other:
+    - redis: message broker, forwards messages from scheduler to workers
+    - flower: app for monitoring the environment (port 5555)
+    - airflow-init: initialization service
+
+### Setup
+
+> [!NOTE]
+> 1. Previously I created my Google credentials when doing the Terraform setup in week 1. I did this in Windows, not WSL. Therefore the Google Service Account credentials json file was stored in my Windows Downloads folder. I moved it to Linux and renamed it according to the course instructions for this week.
+> 2. There was an instruction to increase the memory for Docker Engine, but since Docker is using WSL2, this is not possible directly. Instead I would have to make a .wslconfig file. I will try it without changing this setting, but if I do run into memory problems later on, I will look into this.
+
+#### **Step 1**: Create `.google/credentials` and place `google_credentials.json` there.
+
+#### **Step 2**: Create `airflow` directory with subfolders `dags`, `log`, `plugins`, `scripts`. 
+
+```bash
+mkdir -p airflow/dags airflow/logs airflow/plugins airflow/scripts
+```
+
+In this directory I will set up Airflow as it has already been done in `week_2/airflow`. 
+
+#### **Step 3**: add `entrypoint.sh` to `scripts` folder
+
+Copy `entrypoint.sh` from `week_2` course folder into newly made `airflow/scripts` folder 
+
+#### **Step 3**: Set the Airflow user by creating a `.env` file with your user id
+
+Run this command:
+
+```bash
+echo -e "AIRFLOW_UID=$(id -u)" > .env
+```
+
+#### **Step 5**: Copy `Dockerfile` from `week_2/airflow` folder
+
+#### **Step 6**: Import the official docker setup file
+
+```bash
+curl -LfO 'https://airflow.apache.org/docs/apache-airflow/stable/docker-compose.yaml'
+```
+
+#### **Step 7**: adjust `docker-compose.yaml` to use our dockerfile instead of default airflow image
+
+This part is not explained very clearly in the [course notes](https://github.com/DataTalksClub/data-engineering-zoomcamp/blob/main/cohorts/2022/week_2_data_ingestion/airflow/1_setup_official.md). The final result is given (see `week_2/docker-compose.yaml`), but the changes to make are not mentioned explicitly and I did not want to spend a lot of time sifting through the YAML files to figure out what changes to make.
+
+Therefore I used the [notes by Alvaro](https://github.com/ziritrion/dataeng-zoomcamp/blob/main/notes/2_data_ingestion.md) which explain the steps very clearly. But I was running into an error:
+
+```bash
+(base) kd@DESKTOP-U30C45H:~/coding-practice/data-engineering-course/week_2_data_ingestion_airflow_2022/project/airflow$ docker-compose up airflow-init
+WARN[0000] /home/kd/coding-practice/data-engineering-course/week_2_data_ingestion_airflow_2022/project/airflow/docker-compose.yaml: `version` is obsolete
+[+] Running 4/4
+ ✔ Network airflow_default           Created                                                                                                                                           0.0s
+ ✔ Container airflow-redis-1         Created                                                                                                                                           0.1s
+ ✔ Container airflow-postgres-1      Created                                                                                                                                           0.1s
+ ✔ Container airflow-airflow-init-1  Created                                                                                                                                           0.1s
+Attaching to airflow-init-1
+airflow-init-1  | The container is run as root user. For security, consider using a regular user account.
+airflow-init-1  | ....................
+airflow-init-1  | ERROR! Maximum number of retries (20) reached.
+airflow-init-1  |
+airflow-init-1  | Last check result:
+airflow-init-1  | $ airflow db check
+airflow-init-1  | Traceback (most recent call last):
+airflow-init-1  |   File "/home/airflow/.local/bin/airflow", line 5, in <module>
+airflow-init-1  |     from airflow.__main__ import main
+airflow-init-1  |   File "/home/airflow/.local/lib/python3.6/site-packages/airflow/__init__.py", line 34, in <module>
+airflow-init-1  |     from airflow import settings
+airflow-init-1  |   File "/home/airflow/.local/lib/python3.6/site-packages/airflow/settings.py", line 35, in <module>
+airflow-init-1  |     from airflow.configuration import AIRFLOW_HOME, WEBSERVER_CONFIG, conf  # NOQA F401
+airflow-init-1  |   File "/home/airflow/.local/lib/python3.6/site-packages/airflow/configuration.py", line 1129, in <module>
+airflow-init-1  |     conf.validate()
+airflow-init-1  |   File "/home/airflow/.local/lib/python3.6/site-packages/airflow/configuration.py", line 224, in validate
+airflow-init-1  |     self._validate_config_dependencies()
+airflow-init-1  |   File "/home/airflow/.local/lib/python3.6/site-packages/airflow/configuration.py", line 267, in _validate_config_dependencies
+airflow-init-1  |     raise AirflowConfigException(f"error: cannot use sqlite with the {self.get('core', 'executor')}")
+airflow-init-1  | airflow.exceptions.AirflowConfigException: error: cannot use sqlite with the CeleryExecutor
+airflow-init-1  |
+airflow-init-1 exited with code 1
+```
+
+I tried a lot of troubleshooting steps, but to no avail.
+
+At this point I tried to run the setup in the course folder `week_2/airflow`, which ran fine. So I figured there must be some discrepancy between my setup vs the course's setup (previously I thought it might have something to do with compatibility between docker compose and python). Upon comparing the course's `docker-compose.yaml` file with mine, I found that the `docker-compose.yaml` file from the Airflow documentation page contains the following line:
+
+```yaml
+AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+```
+After changing it as follows, I did not run into error: cannot use sqlite with the CeleryExecutor any longer:
+
+```yaml
+AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+```
+
+Alvaro's notes did not point out this discrepancy between his `docker-compose.yaml` file and the one from the Airflow documentation.
+
+During my troubleshooting, I checked Stack Overflow and found someone else ran into the same `cannot use sqlite with the CeleryExecutor` error. I wrote this [answer](https://stackoverflow.com/a/78877992/11486502).
 
 
 ## [DE Zoomcamp 2.3.4 - Optional: Lightweight Local Setup for Airflow](https://www.youtube.com/watch?v=A1p5LQ0zzaQ&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb)

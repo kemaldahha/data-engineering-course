@@ -4,6 +4,8 @@ harry.txt
 *ny_taxi_postgres_data/
 .*
 *.json
+__pycache__/
+*.log
 
 # Local .terraform directories
 **/.terraform/*
