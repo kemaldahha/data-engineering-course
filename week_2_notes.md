@@ -244,6 +244,52 @@ After that it worked.
 
 ## [DE Zoomcamp 2.3.2 - Ingesting Data to GCP with Airflow](https://www.youtube.com/watch?v=9ksX9REfL8w&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=19)
 
+Now that our Airflow environment is set up, the next step will be to write an ingestion pipeline to ingest compressed, raw data into a data lake in a more queryable format.
+
+The anatomy of a dag and components of a typical workflow will be covered. 
+
+### DAG
+
+There are four main components to a DAG:
+1. DAG: Directec Acyclic Graph
+    - Specifies dependencies between tasks
+    - DAG has an explicit execution order
+    - DAG has a beginning and an end 
+2. Task: defined unit of work
+    - Also known as operatores
+    - Describe what to do such as fetching data, running analysis, triggering other systems, etc.
+3. DAG run: individual execution of a DAG
+4. Task instance: individual run of a single task
+
+Airflow DAG is defined in a Python file and is composed of:
+- DAG definition 
+- Tasks
+- Task dependencies
+
+Declaring a DAG can be done with a context manager or a constructor or a decorator.
+
+Tasks:
+- A DAG runs through a series of tasks. 
+- Types of tasks:
+    - Operators: predefined tasks 
+    - Sensors: special subclass of operators which are event listeners
+- Best practice: tasks should be atomic, i.e. standalone and do not share resources with other tasks.
+
+### Task Dependencies
+
+Responsible for control flow within a DAG. A task operator does not live on its own. It typically has other task operators that it depends on and/or that depend on it.
+
+Dependencies are specified using `>>` or `<<`. Alternatively, if you want to set dependencies explicitly, you can use the `.set_downstream()` and `.set_upstream()` methods.
+
+A task will run when all of its upstream dependencies have succeeded, though there are ways to further customize this behavior.
+
+Passing data between tasks can happen in 2 ways:
+1. `XCOM ` (?) variable
+2. Upload and download data from storage service
+
+Airflow send tasks to workers as space becomes available. 
+
+You can run DAGs manually, via API, or scheduled using scheduled interval variable. 
 
 
 ## [DE Zoomcamp 2.3.3 - Ingesting Data to Local Postgres with Airflow](https://www.youtube.com/watch?v=s2U8MWJH5xA&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb)
