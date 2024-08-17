@@ -140,7 +140,7 @@ Copy `entrypoint.sh` from `week_2` course folder into newly made `airflow/script
 
 #### **Step 3**: Set the Airflow user by creating a `.env` file with your user id
 
-Run this command:
+Run this command in the `project/airflow` folder:
 
 ```bash
 echo -e "AIRFLOW_UID=$(id -u)" > .env
@@ -210,9 +210,36 @@ Alvaro's notes did not point out this discrepancy between his `docker-compose.ya
 
 During my troubleshooting, I checked Stack Overflow and found someone else ran into the same `cannot use sqlite with the CeleryExecutor` error. I wrote this [answer](https://stackoverflow.com/a/78877992/11486502).
 
+#### **Step 8**: adjust `docker-compose.yaml` to use our dockerfile instead of default airflow image
+
+### **Step 9**: Initialize the scheduler, DB, and other config
+
+```bash
+docker build
+```
+
+### **Step 10**: Start all the services
+
+```bash
+docker compose up airflow-init
+```
+
 
 ## [DE Zoomcamp 2.3.4 - Optional: Lightweight Local Setup for Airflow](https://www.youtube.com/watch?v=A1p5LQ0zzaQ&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb)
 
+This shows how to use a lightweight setup to Airflow.
+
+Although my laptop seemed to be able to run the full version, I still followed through these steps to increase my familiarity with Airflow setup using Docker Compose.
+
+I first tried following the YouTube video, but I was getting errors when running `docker compose up`. Then I looked at the [instructions on GitHub](https://github.com/DataTalksClub/data-engineering-zoomcamp/blob/main/cohorts/2022/week_2_data_ingestion/airflow/2_setup_nofrills.md).
+
+After following those, I also got an error about `entrypoint.sh` not being run due to lack of permission. I changed this line in the `docker-compose.yaml` file from `-50000` to `-1000` which is what I get when I run `echo -e "AIRFLOW_UID=$(id -u)"`:
+
+```yaml
+user: "${AIRFLOW_UID:-1000}:0"
+```
+
+After that it worked.
 
 
 ## [DE Zoomcamp 2.3.2 - Ingesting Data to GCP with Airflow](https://www.youtube.com/watch?v=9ksX9REfL8w&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb&index=19)
