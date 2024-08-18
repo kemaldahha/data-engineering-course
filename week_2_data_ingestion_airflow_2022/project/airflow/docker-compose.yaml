@@ -68,6 +68,7 @@ x-airflow-common:
     AIRFLOW_CONN_GOOGLE_CLOUD_DEFAULT: 'google-cloud-platform://?extra__google_cloud_platform__key_path=/.google/credentials/google_credentials.json'
     GCP_PROJECT_ID: 'dtc-de-course-430705'
     GCP_GCS_BUCKET: 'dtc-de-course-430705-terra-bucket'
+    BIGQUERY_DATASET: 'demo_dataset'
 
     # yamllint disable rule:line-length
     # Use simple http server on scheduler for health checks
