@@ -1,7 +1,7 @@
 # Week 2
 
 > [!IMPORTANT]
-Sine I want to learn Apache Airflow, I am following the 2022 cohort version of this week. 
+Since I want to learn Apache Airflow, I am following the 2022 cohort version of this week. 
 The most recent version of the course covering this week ([2024 cohort](https://github.com/DataTalksClub/data-engineering-zoomcamp/tree/main/02-workflow-orchestration)) uses Mage. I'll skim the material and might do a second pass at some point, if I find it necessary
 
 ## [DE Zoomcamp 2.1.1 - Data Lake](https://www.youtube.com/watch?v=W3Zm6rjOq70&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb)
@@ -61,7 +61,7 @@ Data Lake solutions need to be secure, scalable, and its HW inexpensive to be ab
 
 Data pipeline takes data as input, does something, then outputs the data in a different form.
 
-![week 1pipeline](images/image-1.png)
+![week 1pipeline](images/2.2.1/image-1.png)
 
 The pipeline downloads csv data from internet, then reads it, then inserts to a Postgres database.
 
@@ -73,7 +73,7 @@ Better to create multiple files:
 
 Also we can parametrize the various scripts or execute them at separate intervals.
 
-![currentpipeline](images/image-2.png)
+![currentpipeline](images/2.2.1/image-2.png)
 
 How can we set it up? 
 - For example we can do 2 Python scripts and 1 bash script.
@@ -85,7 +85,7 @@ During week 2 a different pipeline will be made:
 - Upload to GSC (possibly also to AWS S3 in parallel)
 - Upload to BigQuery
 
-![newpipeline](images/image-3.png)
+![newpipeline](images/2.2.1/image-3.png)
 
 Each step depends on the previous step, so need to execute in order and verify success of previous step.
 
@@ -212,7 +212,7 @@ During my troubleshooting, I checked Stack Overflow and found someone else ran i
 
 #### **Step 8**: adjust `docker-compose.yaml` to use our dockerfile instead of default airflow image
 
-### **Step 9**: Initialize the scheduler, DB, and other config
+#### **Step 9**: Initialize the scheduler, DB, and other config
 
 ```bash
 docker build
@@ -290,6 +290,7 @@ Passing data between tasks can happen in 2 ways:
 Airflow send tasks to workers as space becomes available. 
 
 You can run DAGs manually, via API, or scheduled using scheduled interval variable.
+<<<<<<< Updated upstream
 
 
 ## Walkthrough of data ingestion script `data_ingestion_gcs_dag.py`
@@ -311,7 +312,138 @@ Short descriptions:
 At the end the dependencies of the tasks are defined. 
 
 When a DAG is run (it can be triggered manually), the status will update in the Airflow browser UI, the log can be inspected.
+=======
+>>>>>>> Stashed changes
 
+
+## Overview of data ingestion script `data_ingestion_gcs_dag.py`
+
+First some libraries are imported, for example: `BashOperator` and `PythonOperator`. Also some libraries are imported that were installed via the `requirements.txt` file from the Docker setup. For example `google.cloud`, which will interact with GCS storage. Besides that a library is imported to interact with BigQuery.
+
+Some values are imported from the environment variables which were set in the Docker setup, like the GCP project and bucket name, as well as the name of the BigQuery table that we will be writing our data into. Note that these were all defined in the `docker-compose.yaml` file. 
+
+Next, some functions follow for our operators: `format_to_parquet` and `upload_to_gcs`. 
+
+Then, a DAG is defined using a context manager. It has the following tasks defined: `download_dataset_task`, `format_to_parquet_task`, `local_to_gcs_task`, and `bigquery_external_table_task`. The second and third functions are PythonOperators. They have an argument `callable`. The functions that were previously defined `format_to_parquet` and `upload_to_csv` are provided as values to these arguments.
+
+Short descriptions:
+- **download_dataset_task**: downloads csv file using a `curl` command from the url specified at the top of the script and store either in memory (Cloud service) or in a temporary folder (Docker)
+- **format_to_parquet_task**: convert from csv to parquet (uses `pyarrow` library)
+- **local_to_gcs_task**: uploads given a filepath to the GCS bucket
+- **bigquery_external_table_task**: from GCS bucket to BigQuery table
+
+At the end the dependencies of the tasks are defined. 
+
+When a DAG is run (it can be triggered manually), the status will update in the Airflow browser UI, the log can be inspected.
+
+
+## Walkthrough of data ingestion script `data_ingestion_gcs_dag.py`
+
+> [!NOTE]
+    I will now go step by step to run the DAG. I will use the normal Airflow setup, rather than the lightweight one.
+
+    Note that we still have Google Cloud Storage Bucket and BigQuery dataset from week 1. So we don't need to do anything with Terraform to set it up. The VM is down, but we will not use that anyway. We are running it locally on WSL2.
+
+#### Step 1: copy `week_2_data_ingestion_airflow_2022/airflow/dags/data_ingestion_gcs_dag.py` to `week_2_data_ingestion_airflow_2022/project/airflow`
+
+#### Step 2: run docker containers
+
+cd into `week_2_data_ingestion_airflow_2022/project/airflow` and run `docker compose up`
+
+#### Step 3: go to `localhost:8080` and trigger the DAG
+
+You should see the DAG now as below:
+
+![airflowdag](images/2.3.2/image.png)
+
+Clicking on the DAG link should show:
+
+![airflowdaglink](images/2.3.2/image-1.png)
+
+Clicking on the play icon on the the top right shows the option to trigger the DAG. Upon clicking on it, the steps in the DAG will start updating their status.
+
+#### Step 4: troubleshooting
+
+In my case, the DAG failed to complete the final task `bigquery_external_table_task`.
+
+Clicking on the status color will show the option to view the logs.
+
+![dagstatus](images/2.3.2/image-2.png)
+
+In the log I found this line:
+
+![failedtasklog](images/2.3.2/image-3.png)
+
+This seems to suggest that the name that the DAG assumes for my BigQuery table does not match the name of it in GCP.
+
+Let's check the name in GCP:
+
+![BQdatasetname](images/2.3.2/image-4.png)
+
+It's called `demo_dataset`
+
+Inspecting the `variables.tf` file with which we set it up using Terraform, it indeed confirms this was the name we gave it previously:
+
+```
+variable "bq_dataset_name" {
+    description = "My BigQuery Dataset Name"
+    default = "demo_dataset"
+}
+```
+
+We will take following steps now:
+1. `CTRL+C` to stop all containers
+2. `docker compose down` to remove them
+3. Change the BigQuery dataset name to `demo_dataset`. 
+    - See more details on how to do this below under 'step 3 explanation'
+5. `docker compose up`
+    - Note that `docker build` was not needed. I initially expected it would have been. I asked ChatGPT about it, see answer below under 'step 5 explanation'.
+6. Run the DAG
+
+![dagsuccesful](images/2.3.2/image-5.png)
+
+##### Step 3 explanation
+
+Note that `data_ingestion_gcs_dag.py` takes the dataset name from the environment variable `BIGQUERY_DATASET`. 
+
+```python
+BIGQUERY_DATASET = os.environ.get("BIGQUERY_DATASET", 'trips_data_all')
+```
+
+If this environment variable is not set, the default is `trips_data_all`. We need to either change the default or set the environment variable in `docker-compose.yaml`.
+
+We will do the latter:
+
+```yaml
+  build:
+    context: .
+    dockerfile: ./Dockerfile
+  environment:
+    &airflow-common-env
+    AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+    AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
+    AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
+    AIRFLOW__CORE__FERNET_KEY: ''
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
+    GOOGLE_APPLICATION_CREDENTIALS: /.google/credentials/google_credentials.json
+    AIRFLOW_CONN_GOOGLE_CLOUD_DEFAULT: 'google-cloud-platform://?extra__google_cloud_platform__key_path=/.google/credentials/google_credentials.json'
+    GCP_PROJECT_ID: 'dtc-de-course-430705'
+    GCP_GCS_BUCKET: 'dtc-de-course-430705-terra-bucket'
+    BIGQUERY_DATASET: 'demo_dataset'
+```
+
+The last line is the change that was made.
+
+##### Step 5 explanation
+
+Answer by ChatGPT why `docker build` is not needed to update environment variable based on the change made in the docker-compose.yaml file:
+
+```
+You didn’t need to run docker-compose build because you only changed the environment variables in the docker-compose.yaml file, not the Dockerfile or the underlying Docker image. The docker-compose build command is used to rebuild Docker images when the Dockerfile or the build context changes. However, environment variables defined in docker-compose.yaml are applied at runtime, so when you ran docker compose down and docker compose up, the updated environment variables (including BIGQUERY_DATASET) were passed to the running containers without needing to rebuild the images. This allowed your DAG to recognize the new environment variable immediately.
+```
 
 ## [DE Zoomcamp 2.3.3 - Ingesting Data to Local Postgres with Airflow](https://www.youtube.com/watch?v=s2U8MWJH5xA&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb)
 
