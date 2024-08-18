@@ -441,9 +441,8 @@ The last line is the change that was made.
 
 Answer by ChatGPT why `docker build` is not needed to update environment variable based on the change made in the docker-compose.yaml file:
 
-```
-You didn’t need to run docker-compose build because you only changed the environment variables in the docker-compose.yaml file, not the Dockerfile or the underlying Docker image. The docker-compose build command is used to rebuild Docker images when the Dockerfile or the build context changes. However, environment variables defined in docker-compose.yaml are applied at runtime, so when you ran docker compose down and docker compose up, the updated environment variables (including BIGQUERY_DATASET) were passed to the running containers without needing to rebuild the images. This allowed your DAG to recognize the new environment variable immediately.
-```
+*You didn’t need to run docker-compose build because you only changed the environment variables in the docker-compose.yaml file, not the Dockerfile or the underlying Docker image. The docker-compose build command is used to rebuild Docker images when the Dockerfile or the build context changes. However, environment variables defined in docker-compose.yaml are applied at runtime, so when you ran docker compose down and docker compose up, the updated environment variables (including BIGQUERY_DATASET) were passed to the running containers without needing to rebuild the images. This allowed your DAG to recognize the new environment variable immediately.*
+
 
 ## [DE Zoomcamp 2.3.3 - Ingesting Data to Local Postgres with Airflow](https://www.youtube.com/watch?v=s2U8MWJH5xA&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb)
 
