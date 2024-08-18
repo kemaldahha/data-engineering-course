@@ -289,7 +289,28 @@ Passing data between tasks can happen in 2 ways:
 
 Airflow send tasks to workers as space becomes available. 
 
-You can run DAGs manually, via API, or scheduled using scheduled interval variable. 
+You can run DAGs manually, via API, or scheduled using scheduled interval variable.
+
+
+## Walkthrough of data ingestion script `data_ingestion_gcs_dag.py`
+
+First some libraries are imported, for example: `BashOperator` and `PythonOperator`. Also some libraries are imported that were installed via the `requirements.txt` file from the Docker setup. For example `google.cloud`, which will interact with GCS storage. Besides that a library is imported to interact with BigQuery.
+
+Some values are imported from the environment variables which were set in the Docker setup, like the GCP project and bucket name, as well as the name of the BigQuery table that we will be writing our data into. Note that these were all defined in the `docker-compose.yaml` file. 
+
+Next, some functions follow for our operators: `format_to_parquet` and `upload_to_gcs`. 
+
+Then, a DAG is defined using a context manager. It has the following tasks defined: `download_dataset_task`, `format_to_parquet_task`, `local_to_gcs_task`, and `bigquery_external_table_task`. The second and third functions are PythonOperators. They have an argument `callable`. The functions that were previously defined `format_to_parquet` and `upload_to_csv` are provided as values to these arguments.
+
+Short descriptions:
+- **download_dataset_task**: downloads csv file using a `curl` command from the url specified at the top of the script and store either in memory (Cloud service) or in a temporary folder (Docker)
+- **format_to_parquet_task**: convert from csv to parquet (uses `pyarrow` library)
+- **local_to_gcs_task**: uploads given a filepath to the GCS bucket
+- **bigquery_external_table_task**: from GCS bucket to BigQuery table
+
+At the end the dependencies of the tasks are defined. 
+
+When a DAG is run (it can be triggered manually), the status will update in the Airflow browser UI, the log can be inspected.
 
 
 ## [DE Zoomcamp 2.3.3 - Ingesting Data to Local Postgres with Airflow](https://www.youtube.com/watch?v=s2U8MWJH5xA&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb)
