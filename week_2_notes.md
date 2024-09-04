@@ -1,15 +1,20 @@
-# Week 2
+up 
+#### Approach 1 (caution: led to an error)Week 2
 
-> [!IMPORTANT]
-Since I want to learn Apache Airflow, I am following the 2022 cohort version of this week. 
-The most recent version of the course covering this week ([2024 cohort](https://github.com/DataTalksClub/data-engineering-zoomcamp/tree/main/02-workflow-orchestration)) uses Mage. I'll skim the material and might do a second pass at some point, if I find it necessary
 
 ## [DE Zoomcamp 2.1.1 - Data Lake](https://www.youtube.com/watch?v=W3Zm6rjOq70&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb)
 
 ### What is a Data Lake?
 
 A Data Lake is a central repository that holds big data from many sources. 
-The data it holds can either be structured, semi-structured, or unstructured.
+- This led to an error whcih I could not resolve.  I want to learn Apache Airflow, I am following the 2022 cohort version of this week. 
+The most recent version of the course covering this week ([2024 cohort](https://github.com/DataTalksClub/data-engineering-zoomcamp/tree/main/02-workflow-orchestration)) uses Mage. I'll skim the material and might do a second pass at some point, if I find it necessary
+# 
+The data it holds can e
+
+
+#### Approach 2 (OK)
+ither be structured, semi-structured, or unstructured.
 
 Data Lakes are extensively used for ML and analytics. They also make use of metadata for faster access to data.
 
@@ -290,30 +295,6 @@ Passing data between tasks can happen in 2 ways:
 Airflow send tasks to workers as space becomes available. 
 
 You can run DAGs manually, via API, or scheduled using scheduled interval variable.
-<<<<<<< Updated upstream
-
-
-## Walkthrough of data ingestion script `data_ingestion_gcs_dag.py`
-
-First some libraries are imported, for example: `BashOperator` and `PythonOperator`. Also some libraries are imported that were installed via the `requirements.txt` file from the Docker setup. For example `google.cloud`, which will interact with GCS storage. Besides that a library is imported to interact with BigQuery.
-
-Some values are imported from the environment variables which were set in the Docker setup, like the GCP project and bucket name, as well as the name of the BigQuery table that we will be writing our data into. Note that these were all defined in the `docker-compose.yaml` file. 
-
-Next, some functions follow for our operators: `format_to_parquet` and `upload_to_gcs`. 
-
-Then, a DAG is defined using a context manager. It has the following tasks defined: `download_dataset_task`, `format_to_parquet_task`, `local_to_gcs_task`, and `bigquery_external_table_task`. The second and third functions are PythonOperators. They have an argument `callable`. The functions that were previously defined `format_to_parquet` and `upload_to_csv` are provided as values to these arguments.
-
-Short descriptions:
-- **download_dataset_task**: downloads csv file using a `curl` command from the url specified at the top of the script and store either in memory (Cloud service) or in a temporary folder (Docker)
-- **format_to_parquet_task**: convert from csv to parquet (uses `pyarrow` library)
-- **local_to_gcs_task**: uploads given a filepath to the GCS bucket
-- **bigquery_external_table_task**: from GCS bucket to BigQuery table
-
-At the end the dependencies of the tasks are defined. 
-
-When a DAG is run (it can be triggered manually), the status will update in the Airflow browser UI, the log can be inspected.
-=======
->>>>>>> Stashed changes
 
 
 ## Overview of data ingestion script `data_ingestion_gcs_dag.py`
@@ -342,7 +323,7 @@ When a DAG is run (it can be triggered manually), the status will update in the 
 > [!NOTE]
     I will now go step by step to run the DAG. I will use the normal Airflow setup, rather than the lightweight one.
 
-    Note that we still have Google Cloud Storage Bucket and BigQuery dataset from week 1. So we don't need to do anything with Terraform to set it up. The VM is down, but we will not use that anyway. We are running it locally on WSL2.
+We still have Google Cloud Storage Bucket and BigQuery dataset from week 1. So we don't need to do anything with Terraform to set it up. The VM is down, but we will not use that anyway. We are running it locally on WSL2.
 
 #### Step 1: copy `week_2_data_ingestion_airflow_2022/airflow/dags/data_ingestion_gcs_dag.py` to `week_2_data_ingestion_airflow_2022/project/airflow`
 
@@ -445,6 +426,89 @@ Answer by ChatGPT why `docker build` is not needed to update environment variabl
 
 
 ## [DE Zoomcamp 2.3.3 - Ingesting Data to Local Postgres with Airflow](https://www.youtube.com/watch?v=s2U8MWJH5xA&list=PL3MmuxUbc_hJed7dXYoJw8DoCuVHhGEQb)
+
+Step-by-step walkthrough to take the `ingest_data.py` script from week 1 and put it in Airflow.
+
+<div style="text-align: center;">
+  <span style="border: 2px solid black; padding: 10px 20px; display: inline-block;">
+    www &rarr; <code>wget</code> or <code>curl</code> &rarr; ingest &rarr; Postgres db
+  </span>
+</div>
+
+<br>
+
+I first create a folder `week_2_data_ingestion_airflow_2022/project/airflow_local`. This is to start from scratch. 
+
+### Step 1: Setup
+
+#### Approach 1 (led to an error)
+
+First I wanted to create a new folder (like I did with the lightweight setup). However, it led to an error which I was unable to solve. I tried searching online and asking ChatGPT, but to no avail. I will continue for now with Approach 2 (which follows the video instruction by creating a new folder only for dags, called `dags_new`) and figure this out when my understanding of Airflow and Docker (Compose) has improved.
+
+- Copy `docker-compose.yaml`, `Dockerfile`, `scripts` folder, `requirements.txt` into working folder.
+- Note: I could put these files in a general location and then for each project which uses the same dependencies, environment variables, settings, I could use the image built from these files.
+- Run command `echo -e "AIRFLOW_UID=$(id -u)" > .env` to store Airflow UID in `.env` 
+- Build the image with `docker compose build`
+    - Note: this step was likely not needed. I took them to follow along with the video. But none of the files have been altered, so the previously build image was the same.
+- Start the containers: `docker compose up`
+- Go to `localhost:8080` and log in
+- This led to an error whcih I could not resolve. 
+    ```python
+    sqlalchemy.exc.ProgrammingError: (psycopg2.errors.UndefinedTable) relation "dag" does not exist
+    LINE 2: FROM dag
+    ```
+
+#### Approach 2 (OK)
+- Create a new folder called `dags_new` in the airflow working directory
+- Change this line in `docker-compose.yaml`
+```yaml
+volumes:
+    - ./dags_new:/opt/airflow/dags
+```
+
+This results in a clean Airflow setup:
+![airflow](images/2.3.3/image.png)
+
+
+### Step 2: Change the DAG mappings
+
+...
+
+
+### Step 3: Create a new DAG with two dummies
+
+...
+
+
+### Step 4: Make them run monthly
+
+...
+
+
+### Step 5: Create a Bash operator, pass the params
+
+...
+
+
+### Step 6: Dpwm;pad yje data
+
+...
+
+
+### Step 7: Put the ingestion script in Airflow
+
+...
+
+
+### Step 8: Modify dependencies - add the ingestion script dependencies
+
+...
+
+
+### Step 9: Put the old docker compose file in the same network
+
+...
+
 
 
 
